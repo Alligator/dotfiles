@@ -1,0 +1,11 @@
+#!/bin/sh
+# kill mosh sessions other than the current one
+# *this must be run outside of tmux*
+pppid=$(ps -o ppid:1 --no-headers "$PPID")
+session_pids=$(pgrep mosh-server | grep -v "$pppid")
+
+for session_pid in $session_pids;
+do
+  echo "killing $session_pid"
+  kill "$session_pid"
+done

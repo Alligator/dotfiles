@@ -1,0 +1,18 @@
+#!/usr/bin/awk -f
+# wc but ignores code in markdown
+
+/^```/ {
+  in_code = !in_code
+}
+
+in_code { next }
+
+/^\t|^    / { next }
+
+{ words[FILENAME] += NF }
+
+END {
+  for (fn in words) {
+    printf "%8d %s\n", words[fn], fn
+  }
+}

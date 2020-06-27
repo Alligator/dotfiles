@@ -1,0 +1,15 @@
+#!/bin/sh
+# print the status of all fail2ban jails
+
+files=$(sudo fail2ban-client status | grep -i "jail list" | sed -e "s/^.*Jail list:\s*//" -e "s/,//g")
+
+for f in ${files}
+do
+  sudo fail2ban-client status "$f" | awk '
+  /^Status/ { jail = $5 }
+  /Currently failed/{ cf = $NF }
+  /Total failed/ { tf = $NF }
+  /Currently banned/ { cb = $NF }
+  /Total banned/ { tb = $NF }
+  END { printf "%-20s failed cur/tot: %-10s banned cur/tot: %s\n", jail, cf "/" tf, cb "/" tb }'
+done

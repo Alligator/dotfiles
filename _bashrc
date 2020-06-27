@@ -1,0 +1,28 @@
+# append to the history file, don't overwrite it
+shopt -s histappend
+
+# check the window size after each command
+shopt -s checkwinsize
+
+# aliases
+if [ -f ~/.bash_aliases ]; then
+  source ~/.bash_aliases
+fi
+
+export EDITOR="vim"
+export PS1='\w $ '
+
+k() {
+	${DEBUG}
+	if [ -z $1 ]; then
+		echo $PWD >> ~/.k
+	else
+		K=~/.k
+		case $1 in
+		clean)	sort $K | uniq > ${K}.tmp && mv ${K}.tmp ${K};;
+		rm)	sed -i -E "\#^${PWD}\$#d" ${K};;
+		ls)	cat ${K};;
+		*)	cd "$(grep -e "$1" ${K} | head -n 1)";;
+		esac
+	fi
+}
