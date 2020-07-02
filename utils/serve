@@ -1,0 +1,63 @@
+#!/bin/sh
+
+port="1717"
+if [ -n "$1" ]; then
+  port=$1
+fi
+
+printf "listening on %s\n" "$port"
+
+prog=$(cat << "EOF"
+# wtf posix shell
+IFS="$(printf '%b_' ' \t\n\r')"
+IFS="${IFS%_}"
+
+read -r method location _
+
+printf "%s %s %s %s\n" "$(date -Iseconds)" "$method" "$location" "$_" >&2
+
+ok_header() {
+  printf 'HTTP/1.1 200 OK\r\n\r\n'
+}
+
+case $method in
+  GET)
+    location=${location#/}
+    if [ "$location" = "" ]; then
+      location=$(realpath .)
+    fi
+
+    if [ -f "$location" ]; then
+      # file
+      ok_header
+      cat "$location"
+    elif [ -d "$location" ] && [ -f "$location/index.html" ]; then
+      # index.html
+      ok_header
+      cat "$location/index.html"
+    elif [ -d "$location" ]; then
+      # directory listing
+      ok_header
+      echo "<pre>"
+      for file in "$location"/*
+      do
+        file=$(realpath --relative-to="." "$file")
+        printf "<a href=\"%s\">%s</a><br/>" "$file" "$file"
+      done
+      echo "</pre>"
+    else
+      # 404
+      printf 'HTTP/1.1 404 Not Found\r\n\r\nnot found'
+      exit
+    fi
+    ;;
+
+  *)
+    printf 'HTTP/1.1 200 OK\r\n\r\n'
+    exit
+    ;;
+esac
+EOF
+)
+
+ncat -c "$prog" -kl "$port"
