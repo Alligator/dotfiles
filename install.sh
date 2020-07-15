@@ -1,4 +1,5 @@
 #!/bin/sh
+# installer
 
 set -e
 

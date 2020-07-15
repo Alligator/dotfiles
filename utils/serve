@@ -1,4 +1,5 @@
 #!/bin/sh
+# ncat + shell http server, probably not a good idea
 
 port="1717"
 if [ -n "$1" ]; then
