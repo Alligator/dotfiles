@@ -1,6 +1,13 @@
 #!/bin/sh
 # kill mosh sessions other than the current one
 # *this must be run outside of tmux*
+
+if [ -n "$TMUX" ];
+then
+  echo "this must be run outside of tmux!"
+  return
+fi
+
 pppid=$(ps -o ppid:1 --no-headers "$PPID")
 session_pids=$(pgrep mosh-server | grep -v "$pppid")
 
