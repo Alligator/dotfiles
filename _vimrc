@@ -29,6 +29,7 @@ set smartcase           "An uppercase letter is found
 set virtualedit=all     "Cursor can move anywhere (ish)
 set scrolloff=8         "Keeps the cursor centered while scrolling
 set vb                  "Visual bell
+set t_vb=               "shut up bell
 set wildmenu            "Display options when autocompleting in cmdline mode
 set shellslash          "Use / instead of \ for file paths and such
 set spl=en_gb           "Language for spellchecking
