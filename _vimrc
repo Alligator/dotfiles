@@ -241,3 +241,19 @@ let g:accent_color='cyan'
 colo accent
 
 set cinoptions=l1
+
+function! s:ExecuteInShell(command)
+    let command = join(map(split(a:command), 'expand(v:val)'))
+    let og_winnr = bufwinnr(bufnr())
+    let winnr = bufwinnr('*shell-buf*')
+    silent! execute  winnr < 0 ? 'botright vnew *shell-buf*' : winnr . 'wincmd w'
+    setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile nonumber modifiable
+    echo 'Execute ' . command . '...'
+    silent! execute 'silent %!'. command
+    silent! redraw
+    setl nomodifiable
+    silent! execute 'nnoremap <silent> <buffer> <LocalLeader>r :call <SID>ExecuteInShell(''' . command . ''')<CR>'
+    silent! execute 'nnoremap <silent> <buffer> q :q<CR>'
+    silent! execute og_winnr . 'wincmd w'
+    echo 'Shell command ' . command . ' executed.'
+endfunction
