@@ -239,3 +239,5 @@ let g:vimwiki_list = [wiki]
 set t_Co=256
 let g:accent_color='cyan'
 colo accent
+
+set cinoptions=l1
