@@ -216,24 +216,6 @@ set listchars=tab:\>\ ,eol:¬,nbsp:_
 "Setting the statusline
 set statusline=%f\ %m%=%l/%L
 
-"GVim
-"----
-"set colorscheme locally
-" colorscheme solarized
-if has("gui_running")
-  set guioptions=ac       "Turn off most of the GUI stuff
-else
-  set background=dark
-  set t_Co=16
-endif
-
-"Mvim
-"----
-if has('gui_macvim')
-  set columns=85
-  set lines=35
-endif
-
 "==============================================================================
 "PLUGINS
 "==============================================================================
@@ -242,30 +224,6 @@ let NERDTreeWinPos='left'
 nnoremap <silent> <Leader>nt :NERDTree.<CR>
 "Open tree using file's directory
 nnoremap <silent> <Leader>nf :NERDTree %:p:h<CR>
-
-"Fuzzy Finder
-nnoremap <Leader>f :FufFile<CR>
-
-"ConqueTerm
-let g:ConqueTerm_ReadUnfocused = 1
-
-"Solarized
-if exists('togglebg#map')
-  call togglebg#map("<F5>")
-endif
-
-"ZenCoding
-let g:user_zen_settings = {
-      \  'indentation' : '  '
-      \}
-
-"Slimv
-let g:paredit_leader = '\'
-let g:lisp_raindow = 1
-
-"Airline
-" let g:airline_right_sep = ''
-" let g:airline_left_sep = ''
 
 map <Space> ,
 
