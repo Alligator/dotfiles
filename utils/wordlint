@@ -1,4 +1,5 @@
 #!/usr/bin/awk -f
+# lint prose
 BEGIN {
   rules["basically"] = 1
   rules["clearly"] = 1
