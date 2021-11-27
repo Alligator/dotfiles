@@ -1,0 +1,115 @@
+#!/usr/bin/awk -f
+BEGIN {
+  rules["basically"] = 1
+  rules["clearly"] = 1
+  rules["easily"] = 1
+  rules["easy"] = 1
+  rules["however"] = 1
+  rules["just"] = 1
+  rules["obviously"] = 1
+  rules["simple"] = 1
+  rules["simply"] = 1
+  rules["advancing"] = 1
+  rules["combating"] = 1
+  rules["countering"] = 1
+  rules["empower"] = 1
+  rules["focusing"] = 1
+  rules["initiate"] = 1
+  rules["liaise"] = 1
+  rules["overarching"] = 1
+  rules["robust"] = 1
+  rules["streamline"] = 1
+  rules["utilise"] = 1
+  rules["agenda"] = "unless it’s for a meeting"
+  rules["pledge"] = "we need to be more specific - we’re either doing something or we’re not"
+  rules["collaborate"] = "use working with"
+  rules["deliver"] = "pizzas, post and services are delivered - not abstract concepts like improvements or priorities"
+  rules["deploy"] = "unless it’s military or software"
+  rules["dialogue"] = "we speak to people"
+  rules["disincentivise"] = "and incentivise"
+  rules["facilitate"] = "instead, say something specific about how you’re helping"
+  rules["foster"] = "unless it’s children"
+  rules["impact"] = "do not use this as a synonym for have an effect on, or influence"
+  rules["key"] = "unless it unlocks something. A subject/thing is not key - it’s probably important"
+  rules["land"] = "as a verb only use if you’re talking about aircraft"
+  rules["leverage"] = "unless in the financial sense"
+  rules["progress"] = "as a verb - what are you actually doing?"
+  rules["promote"] = "unless you’re talking about an ad campaign or some other marketing promotion"
+  rules["strengthening"] = "unless it’s strengthening bridges or other structures"
+  rules["tackling"] = "unless it’s rugby, football or some other sport"
+  rules["transforming"] = "what are you actually doing to change it?"
+  rules["there are"] = "remove or replace with the real subject"
+  rules["there is"] = "remove or replace with the real subject"
+}
+
+{
+  delete matches
+  first_match_index = 0
+  last_match_index = 0
+  l = tolower($0)
+  for (rule in rules) {
+    if (match(l, "\\<" rule "\\>")) {
+      matches[RSTART][0] = RLENGTH
+      matches[RSTART][1] = rule
+      if (!first_match_index) {
+        first_match_index = RSTART
+      }
+      last_match_index = RSTART + RLENGTH
+    }
+  }
+
+  if (length(matches) == 0) {
+    next
+  }
+
+  if (printed != FILENAME) {
+    printf "\n%s\n", FILENAME
+    printed = FILENAME
+  }
+
+  split($0, chars, "")
+
+  display_start_index = first_match_index - 20
+  display_prefix = "..."
+  if (display_start_index < 0) {
+    display_start_index = 0
+    display_prefix = ""
+  }
+
+  display_end_index = last_match_index + 20
+  display_suffix = "..."
+  if (display_end_index > length(chars)) {
+    display_end_index = length(chars) + 1
+    display_suffix = ""
+  }
+
+  red = 0
+  printf "line %d: %s", FNR, display_prefix
+
+  for (i = display_start_index; i < display_end_index; i++) {
+    if (length(matches[i])) {
+      red = matches[i][0];
+      printf "\x1b[91m"
+    }
+
+    printf "%s", chars[i]
+
+    if (red > 0) {
+      red--;
+      if (red == 0) {
+        printf "\x1b[0m"
+      }
+    }
+  }
+
+  print display_suffix
+
+  for (m in matches) {
+    if (length(matches[m]) == 0) {
+      continue
+    }
+    msg = rules[matches[m][1]]
+    if (msg != 1)
+      printf "  \x1b[93m%s\x1b[0m: %s\n", matches[m][1], msg
+  }
+}
