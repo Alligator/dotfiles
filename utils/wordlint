@@ -7,6 +7,7 @@ BEGIN {
   rules["easy"] = 1
   rules["however"] = 1
   rules["just"] = 1
+  rules["obvious"] = 1
   rules["obviously"] = 1
   rules["simple"] = 1
   rules["simply"] = 1
@@ -21,17 +22,20 @@ BEGIN {
   rules["robust"] = 1
   rules["streamline"] = 1
   rules["utilise"] = 1
+  rules["incentivise"] = 1
+  rules["disincentivise"] = 1
+  rules["usually"] = 1
+  rules["typically"] = 1
   rules["agenda"] = "unless it’s for a meeting"
-  rules["pledge"] = "we need to be more specific - we’re either doing something or we’re not"
-  rules["collaborate"] = "use working with"
+  rules["pledge"] = "unless you're talking about BSD"
+  rules["collaborate"] = "use 'working with'"
   rules["deliver"] = "pizzas, post and services are delivered - not abstract concepts like improvements or priorities"
   rules["deploy"] = "unless it’s military or software"
   rules["dialogue"] = "we speak to people"
-  rules["disincentivise"] = "and incentivise"
-  rules["facilitate"] = "instead, say something specific about how you’re helping"
+  rules["facilitate"] = "what are you doing to help?"
   rules["foster"] = "unless it’s children"
   rules["impact"] = "do not use this as a synonym for have an effect on, or influence"
-  rules["key"] = "unless it unlocks something. A subject/thing is not key - it’s probably important"
+  rules["key"] = "unless it unlocks something. Use 'important'"
   rules["land"] = "as a verb only use if you’re talking about aircraft"
   rules["leverage"] = "unless in the financial sense"
   rules["progress"] = "as a verb - what are you actually doing?"
@@ -41,6 +45,33 @@ BEGIN {
   rules["transforming"] = "what are you actually doing to change it?"
   rules["there are"] = "remove or replace with the real subject"
   rules["there is"] = "remove or replace with the real subject"
+  rules["ly"] = "watch out for adverbs"
+  rules["going forward"] = "now? in ten years? be specific or remove it"
+  rules["at this point in time"] = "use 'now'"
+  rules["determine the location of"] = "use 'find'"
+  rules["is able to"] = "use 'can'"
+  rules["the fact that"] = "too wordy"
+
+  # hedge words
+  rules["all i know is"] = "hedge"
+  rules["by the way"] = "hedge"
+  rules["as far as i can tell"] = "hedge"
+  rules["i mean"] = "hedge"
+  rules["seems"] = "hedge"
+  rules["partially"] = "hedge"
+  rules["mostly"] = "hedge"
+  rules["almost"] = "hedge"
+  rules["a little"] = "hedge"
+  rules["apparently"] = "hedge"
+  rules["maybe"] = "hedge"
+  rules["may be"] = "hedge"
+  rules["somewhat"] = "hedge"
+  rules["probably"] = "hedge"
+  rules["might"] = "hedge"
+  rules["sort of"] = "hedge"
+  rules["a bit"] = "hedge"
+  rules["sometimes"] = "hedge"
+  rules["kind of"] = "hedge"
 }
 
 {
@@ -49,13 +80,17 @@ BEGIN {
   last_match_index = 0
   l = tolower($0)
   for (rule in rules) {
-    if (match(l, "\\<" rule "\\>")) {
+    if (match(l, rule "\\>")) {
       matches[RSTART][0] = RLENGTH
       matches[RSTART][1] = rule
-      if (!first_match_index) {
+
+      if (!first_match_index || RSTART < first_match_index) {
         first_match_index = RSTART
       }
-      last_match_index = RSTART + RLENGTH
+
+      if (!last_match_index || (RSTART + RLENGTH > last_match_index)) {
+        last_match_index = RSTART + RLENGTH
+      }
     }
   }
 
