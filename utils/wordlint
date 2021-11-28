@@ -1,5 +1,7 @@
 #!/usr/bin/awk -f
 # lint prose
+# vim command:
+#   command!    -nargs=0 Wordlint cexpr system('wordlint --vim ' . shellescape(expand('%')))
 BEGIN {
   rules["basically"] = 1
   rules["clearly"] = 1
@@ -72,6 +74,12 @@ BEGIN {
   rules["a bit"] = "hedge"
   rules["sometimes"] = "hedge"
   rules["kind of"] = "hedge"
+
+  vim_mode = 0
+  if (ARGV[1] == "--vim") {
+    vim_mode = 1
+    delete ARGV[1]
+  }
 }
 
 {
@@ -95,6 +103,22 @@ BEGIN {
   }
 
   if (length(matches) == 0) {
+    next
+  }
+
+  if (vim_mode) {
+    for (m in matches) {
+      if (length(matches[m]) == 0) {
+        continue
+      }
+      msg = rules[matches[m][1]]
+      # %f:%l:%c:%m
+      if (msg != 1) {
+        printf "%s:%d:%d:%s: %s\n", FILENAME, FNR, m, matches[m][1], msg > "/dev/stderr"
+      } else {
+        printf "%s:%d:%d:%s\n", FILENAME, FNR, m, matches[m][1] > "/dev/stderr"
+      }
+    }
     next
   }
 
