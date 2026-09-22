@@ -1,7 +1,7 @@
 #!/usr/bin/awk -f
 # lint prose
 # vim command:
-#   command!    -nargs=0 Wordlint cexpr system('wordlint --vim ' . shellescape(expand('%')))
+#   command!    -nargs=0 Wordlint cexpr system('wordlint -v vim=1 ' . shellescape(expand('%')))
 BEGIN {
   rules["basically"] = 1
   rules["clearly"] = 1
@@ -76,12 +76,6 @@ BEGIN {
   rules["sometimes"] = "hedge"
   rules["kind of"] = "hedge"
 
-  vim_mode = 0
-  if (ARGV[1] == "--vim") {
-    vim_mode = 1
-    delete ARGV[1]
-  }
-
   in_code = 0
 }
 
@@ -93,10 +87,11 @@ in_code { next }
   first_match_index = 0
   last_match_index = 0
   l = tolower($0)
+  word_boundary = "([^[:alnum:]]|$)"
   for (rule in rules) {
-    if (match(l, rule "\\>") ) {
-      matches[RSTART][0] = RLENGTH
-      matches[RSTART][1] = rule
+    if (match(l, rule word_boundary) ) {
+      matches[RSTART] = RLENGTH
+      match_rules[RSTART] = rule
 
       if (!first_match_index || RSTART < first_match_index) {
         first_match_index = RSTART
@@ -112,17 +107,18 @@ in_code { next }
     next
   }
 
-  if (vim_mode) {
+  if (vim) {
     for (m in matches) {
-      if (length(matches[m]) == 0) {
-        continue
-      }
-      msg = rules[matches[m][1]]
+      # if (length(matches[m]) == 0) {
+      #   continue
+      # }
+      mr = match_rules[m]
+      msg = rules[mr]
       # %f:%l:%c:%m
       if (msg != 1) {
-        printf "%s:%d:%d:%s: %s\n", FILENAME, FNR, m, matches[m][1], msg > "/dev/stderr"
+        printf "%s:%d:%d:%s: %s\n", FILENAME, FNR, m, mr, msg > "/dev/stderr"
       } else {
-        printf "%s:%d:%d:%s\n", FILENAME, FNR, m, matches[m][1] > "/dev/stderr"
+        printf "%s:%d:%d:%s\n", FILENAME, FNR, m, mr > "/dev/stderr"
       }
     }
     next
@@ -153,8 +149,8 @@ in_code { next }
   printf "line %d: %s", FNR, display_prefix
 
   for (i = display_start_index; i < display_end_index; i++) {
-    if (length(matches[i])) {
-      red = matches[i][0];
+    if (matches[i] > 0) {
+      red = matches[i];
       printf "\x1b[91m"
     }
 
@@ -171,11 +167,11 @@ in_code { next }
   print display_suffix
 
   for (m in matches) {
-    if (length(matches[m]) == 0) {
+    if (matches[m] == 0) {
       continue
     }
-    msg = rules[matches[m][1]]
+    msg = rules[match_rules[m]]
     if (msg != 1)
-      printf "  \x1b[93m%s\x1b[0m: %s\n", matches[m][1], msg
+      printf "  \x1b[93m%s\x1b[0m: %s\n", match_rules[m], msg
   }
 }
