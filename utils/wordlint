@@ -53,6 +53,7 @@ BEGIN {
   rules["determine the location of"] = "use 'find'"
   rules["is able to"] = "use 'can'"
   rules["the fact that"] = "too wordy"
+  rules["voice"] = "unless you're talking about sounds coming from throats"
 
   # hedge words
   rules["all i know is"] = "hedge"
@@ -80,7 +81,12 @@ BEGIN {
     vim_mode = 1
     delete ARGV[1]
   }
+
+  in_code = 0
 }
+
+/^```/ { in_code = !in_code }
+in_code { next }
 
 {
   delete matches
@@ -88,7 +94,7 @@ BEGIN {
   last_match_index = 0
   l = tolower($0)
   for (rule in rules) {
-    if (match(l, rule "\\>")) {
+    if (match(l, rule "\\>") ) {
       matches[RSTART][0] = RLENGTH
       matches[RSTART][1] = rule
 
